@@ -4,7 +4,7 @@ const makeWASocket = require("@whiskeysockets/baileys").default;
 
  const util = require("util"); 
 
- const { useMultiFileAuthState, jidDecode, makeInMemoryStore, DisconnectReason, fetchLatestBaileysVersion } = require("@whiskeysockets/baileys"); 
+ const { useMultiFileAuthState, jidDecode, DisconnectReason, fetchLatestBaileysVersion } = require("@whiskeysockets/baileys"); 
  const logger = require("@whiskeysockets/baileys/lib/Utils/logger").default; 
  const pino = require("pino"); 
  const gp = ["254114660061"];  
@@ -23,15 +23,23 @@ const makeWASocket = require("@whiskeysockets/baileys").default;
    return !color ? chalk.green(text) : chalk.keyword(color)(text); 
  }; 
 
+const session = process.env.SESSION || '';
 
+async function authentication() {
+  try {
+    if (!fs.existsSync("./session/creds.json")) {
+      console.log('Connecting...');
+      await fs.writeFileSync("./session/creds.json", atob(session), "utf8");
+    } else if (session !== "zokk") {
+      await fs.writeFileSync("./session/creds.json", atob(session), "utf8");
+    }
+  } catch (_0xf348d3) {
+    console.log("Session is invalid: " + _0xf348d3);
+    return;
+  }
+}
 
- // const { Socket } = Extra; 
- global.store = makeInMemoryStore({ 
-  logger: pino().child({ 
-     level: 'silent', 
-     stream: 'store'  
-   }) 
- }); 
+authentication();
 
  function smsg(m, conn) { 
    if (!m) return; 
@@ -47,6 +55,7 @@ const makeWASocket = require("@whiskeysockets/baileys").default;
    } 
    return m; 
  } 
+
  async function main () { 
  // const main = async () => { 
 
